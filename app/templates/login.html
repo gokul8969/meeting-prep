@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Log in</title><link rel="stylesheet" href="/static/app.css"></head>
+<body><main style="max-width:380px;padding-top:80px">
+<div class="card"><h1>Meeting Prep &amp; Radar</h1><p class="muted small">Access is limited to the named POC users.</p>
+{% if error %}<div class="err">{{ error }}</div>{% endif %}
+<form method="post" action="/login"><input type="hidden" name="next" value="{{ next }}">
+<label>Name</label><input type="text" name="username" autofocus required>
+<label>Password</label><input type="password" name="password" required>
+<p><button class="btn primary">Log in</button></p></form></div></main></body></html>

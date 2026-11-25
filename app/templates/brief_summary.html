@@ -1,0 +1,34 @@
+{% extends "standalone.html" if standalone else "base.html" %}{% import "brief_macros.html" as bm %}
+{% block title %}Summary: {{ v.account.name }}{% endblock %}
+{% block body %}
+{% if not standalone %}<div class="toolbar no-print">
+<a class="btn" href="/preps/{{ v.prep.id }}">Back to prep</a>
+<a class="btn primary" href="/briefs/{{ v.brief.id }}/pack">Full prep pack</a>
+<span class="sp"></span>
+<span class="small muted">Download:</span>
+<a class="btn small" href="/briefs/{{ v.brief.id }}/download/summary.pdf">Summary PDF</a>
+<a class="btn small" href="/briefs/{{ v.brief.id }}/download/summary.html">Summary HTML</a>
+<a class="btn small" href="/briefs/{{ v.brief.id }}/download/all.zip">Both (zip)</a>
+</div>{% endif %}
+<div class="doc">
+<h1>{{ v.account.name }}</h1>
+<div class="sub">Meeting {{ v.prep.meeting_date }} · {{ v.products|join(' and ') }} · {{ v.stages_text }}<br>
+Goal: {{ v.prep.good_result }} · Brief version {{ v.brief.version }}, {{ v.brief.created_at[:16].replace('T',' ') }} UTC</div>
+{% if not v.apollo_used %}<div class="notice">Apollo was not used for this research. People findings are rated one confidence level lower.</div>{% endif %}
+
+<h2>Before you walk in</h2>
+{% for p in v.highlights %}<div class="hl" {% if not standalone %}data-edit="highlights|{{ loop.index0 }}" data-hasfindings="{{ '1' if p.finding_ids else '0' }}"{% endif %}><span class="pt-text">{{ p.text }}</span> {{ bm.tags(p) }}{{ bm.srcs(p) }}</div>
+{% else %}<p class="empty">No highlights.</p>{% endfor %}
+
+<h2>One key point per section</h2>
+{% for no in range(2, 11) %}{% set kp = v.sections[no].key_point %}
+{% if kp and kp.text %}<a class="keypoint" href="{{ pack_href }}#s{{ no }}"><b>{{ no }}. {{ PACK[no] }}</b><br><span class="pt-text">{{ kp.text }}</span> {{ bm.tags(kp) }}</a>{% endif %}
+{% endfor %}
+{% set nq = v.question_groups|map(attribute='questions')|map('length')|sum %}
+<a class="keypoint" href="{{ pack_href }}#s11"><b>11. Questions to ask</b><br>{{ nq }} questions{% if v.question_groups %}, starting with: “{{ v.question_groups[0].questions[0].text }}”{% endif %}</a>
+{% if v.plan.next_step %}<a class="keypoint" href="{{ pack_href }}#s12"><b>12. Meeting plan and next step</b><br>Suggested next step: {{ v.plan.next_step }}</a>{% endif %}
+<a class="keypoint" href="{{ pack_href }}#s13"><b>13. Sources and confidence</b><br>{{ v.sources|length }} sources behind this brief.</a>
+<p class="tiny muted" style="margin-top:20px">Every point shows its confidence. Low confidence items are to validate, not facts. Inferences are labelled. Nothing in this brief has been sent to the customer.</p>
+</div>
+{% endblock %}
+{% block scripts %}{% if not standalone %}<script>initBriefEdit({{ v.brief.id }})</script>{% endif %}{% endblock %}

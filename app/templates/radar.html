@@ -1,0 +1,40 @@
+{% extends "base.html" %}{% block body %}
+<h1>Trusted Advisor Radar</h1>
+<div class="grid g2">
+<div class="card"><h2 style="margin-top:0">Add one account</h2>
+<form method="post" action="/radar/add">
+<div class="row"><div><label>Company name *</label><input type="text" name="name" required></div><div><label>Website *</label><input type="text" name="website" required placeholder="example.com"></div></div>
+<div class="row"><div><label>Product focus</label><select name="product_focus"><option value="">Both</option><option value="amasol">amasol</option><option value="klaricore">klaricore</option><option value="both">Both</option></select></div>
+<div><label>Region</label><input type="text" name="region"></div></div>
+<label>Lead source</label><input type="text" name="lead_source">
+<label>Notes</label><input type="text" name="notes">
+<p><button class="btn primary">Add and research</button></p></form></div>
+<div class="card"><h2 style="margin-top:0">Add a list</h2>
+<form method="post" action="/radar/bulk" enctype="multipart/form-data">
+<label>Paste rows <span class="muted">(company name, website; optional: product focus, region, lead source, notes)</span></label>
+<textarea name="pasted" rows="5" placeholder="Siemens Energy, siemens-energy.com, both, Germany"></textarea>
+<label>Or upload a CSV file</label><input type="file" name="file" accept=".csv,.txt">
+<p><button class="btn">Add list</button></p></form>
+<p class="tiny muted">Every account goes through company identification. Unsure matches wait below for you to confirm. Duplicates are merged into one profile.</p></div>
+</div>
+
+{% if pending %}<div class="card"><h2 style="margin-top:0">To confirm</h2>
+{% for p in pending %}{% set idx = loop.index0 %}<div class="finding"><b>{{ p.row.name or p.row.website }}</b> {% if p.row.website %}<span class="muted">({{ p.row.website }})</span>{% endif %}
+{% if p.error %}<div class="err small">{{ p.error }}</div>{% endif %}
+<form method="post" action="/radar/pending/{{ idx }}" class="row" style="margin-top:6px">
+<select name="choice">{% for c in p.candidates %}<option value="{{ loop.index0 }}">{{ c.name }} ({{ c.website }}{% if c.hq_country %}, {{ c.hq_country }}{% endif %}){% if c.note %}: {{ c.note }}{% endif %}</option>{% endfor %}<option value="drop">None of these: drop</option></select>
+<button class="btn small" style="flex:0 0 auto">Confirm</button></form></div>{% endfor %}</div>{% endif %}
+
+<div class="card"><h2 style="margin-top:0">Accounts</h2>
+<div class="table-wrap"><table><tr><th>Account</th><th>Radar</th><th>Focus</th><th>Alerts</th><th>Last research</th><th>Moved</th><th></th></tr>
+{% for a in accounts %}<tr>
+<td><a href="/accounts/{{ a.id }}"><b>{{ a.name }}</b></a><div class="tiny muted">{{ a.website }}</div></td>
+<td>{% if a.in_radar %}<span class="chip status-Updated">Tracked</span>{% else %}<span class="chip">Not tracked</span>{% endif %}</td>
+<td class="small">{{ a.product_focus or 'both' }}</td>
+<td>{% if a.high_open %}<span class="conf Low">{{ a.high_open }} high</span> {% endif %}{% if a.alerts_open %}<span class="small">{{ a.alerts_open }} open</span>{% endif %}</td>
+<td class="small">{% if a.run and a.run.status == 'running' %}<span class="chip">researching…</span>{% else %}{{ (a.last_research_at or '')[:10] }}{% endif %}</td>
+<td class="small">{% if a.moved_at %}{{ a.moved_note }}{% endif %}</td>
+<td><form method="post" action="/accounts/{{ a.id }}/find-new" class="inline"><button class="btn small">Find new</button></form></td></tr>
+{% else %}<tr><td colspan="7" class="empty">No accounts yet.</td></tr>{% endfor %}</table></div></div>
+{% endblock %}
+{% block scripts %}{% if accounts|selectattr('run')|map(attribute='run')|selectattr('status','equalto','running')|list %}<script>setTimeout(()=>location.reload(),8000)</script>{% endif %}{% endblock %}

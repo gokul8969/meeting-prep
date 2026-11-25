@@ -1,0 +1,45 @@
+{% macro conf(c) %}{% if c %}<span class="conf {{ c }}">{{ c }}{% if c == 'Low' %}, to validate{% endif %}</span>{% endif %}{% endmacro %}
+
+{% macro ftags(f) %}
+{{ conf(f.confidence) }}
+{% if f.type == 'Rep input' %}<span class="chip tag-rep">Rep input</span>{% elif f.type == 'Inferred' %}<span class="chip tag-inf">Inference</span>{% endif %}
+{% if f.status and f.status != 'New' %}<span class="chip status-{{ f.status.split(' ')[0] }}">{{ f.status }}</span>{% endif %}
+{% if f.rep_verdict %}<span class="chip tag-rep">Rep {{ f.rep_verdict|lower }}</span>{% endif %}
+{% if f.out_of_date %}<span class="chip tag-warn">Over 24 months old, possibly out of date</span>{% endif %}
+{% endmacro %}
+
+{% macro fsources(f) %}
+{% for s in f.sources %}{% if s.url %}<a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.publisher or (s.url|host) }}</a>{% else %}{{ s.publisher }}{% endif %} (tier {{ s.tier if s.tier else 'rep' }}{% if s.published and s.tier %}, {{ s.published }}{% endif %}){% if not loop.last %}; {% endif %}{% endfor %}
+{% endmacro %}
+
+{% macro finding(f, verdict=false, show_history=false) %}
+<div class="finding{% if f.status == 'Superseded' %} superseded{% endif %}" id="f{{ f.id }}">
+  <div>{% if f.rep_verdict == 'Corrected' and f.rep_correction %}<s class="muted">{{ f.statement }}</s> <b>{{ f.rep_correction }}</b>{% else %}{{ f.statement }}{% endif %}
+  {% if f.person %}<span class="chip">{{ f.person.name }}</span>{% endif %}</div>
+  <div class="meta">{{ ftags(f) }}
+   {% if f.reasoning %}<span>{{ f.reasoning }}</span> · {% endif %}
+   {% if f.so_what %}<span>So what: {{ f.so_what }}</span> · {% endif %}
+   {% if f.entity %}<span>Entity: {{ f.entity }}</span> · {% endif %}
+   Found {{ f.date_found }}{% if f.last_seen and f.last_seen != f.date_found %}, last seen {{ f.last_seen }}{% endif %} · {{ f.origin }}<br>
+   Sources: {{ fsources(f) }}
+   {% if f.conflicts_with_id %} · <a href="#f{{ f.conflicts_with_id }}">conflicts with #{{ f.conflicts_with_id }}</a>{% endif %}
+   {% if f.supersedes_id %} · replaces #{{ f.supersedes_id }}{% endif %}
+   {% if f.superseded_by_id %} · superseded by #{{ f.superseded_by_id }}{% endif %}
+   {% if f.linked_question %} · Question: “{{ f.linked_question }}”{% endif %}
+  </div>
+  {% if verdict and f.type != 'Rep input' %}
+  <div class="verdict" data-fid="{{ f.id }}">
+    <button type="button" class="btn small {% if f.rep_verdict == 'Confirmed' %}on{% endif %}" data-v="Confirmed">Confirm</button>
+    <button type="button" class="btn small {% if f.rep_verdict == 'Corrected' %}on{% endif %}" data-v="Corrected">Correct</button>
+    <button type="button" class="btn small {% if f.rep_verdict == 'Rejected' %}on{% endif %}" data-v="Rejected">Reject</button>
+    {% if f.rep_verdict %}<button type="button" class="btn small link" data-v="Clear">undo</button>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro steps(run) %}
+<ul class="steps" id="steps">
+{% for s in (run.steps_json|fromjson or []) %}<li class="{{ s.status }}"><span class="dot"></span><span>{{ s.label }}</span> <span class="muted small">{{ s.detail }}</span></li>{% endfor %}
+</ul>
+{% endmacro %}

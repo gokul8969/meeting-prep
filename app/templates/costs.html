@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block body %}
+<h1>Research and model costs</h1>
+<p class="muted small">Logged per call and per run (meeting prep, Find new, digest), so the cost at scale can be estimated. Prices are set in the environment (USD).</p>
+<div class="card"><div class="table-wrap"><table><tr><th>Kind</th><th>Runs</th><th>Total</th><th>Average per run</th></tr>
+{% for t in totals %}<tr><td>{{ t.kind }}</td><td>{{ t.n }}</td><td>${{ '%.2f'|format(t.usd or 0) }}</td><td>${{ '%.3f'|format(t.avg or 0) }}</td></tr>{% endfor %}
+<tr><td>company identification</td><td></td><td>${{ '%.2f'|format(unattached) }}</td><td></td></tr></table></div></div>
+<div class="card"><div class="table-wrap"><table><tr><th>Run</th><th>Kind</th><th>Account</th><th>Status</th><th>Calls</th><th>Searches</th><th>Cost</th><th>Started</th></tr>
+{% for r in runs %}<tr><td>{{ r.id }}</td><td>{{ r.kind }}</td><td>{{ r.account_name or '' }}</td><td>{{ r.status }}</td><td>{{ r.calls }}</td><td>{{ r.searches or 0 }}</td><td>${{ '%.3f'|format(r.cost_usd or 0) }}</td><td class="small">{{ (r.started_at or '')[:16].replace('T',' ') }}</td></tr>{% endfor %}</table></div></div>
+{% endblock %}

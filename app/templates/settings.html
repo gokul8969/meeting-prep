@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block body %}
+<h1>Settings</h1>
+<div class="grid g2">
+<div class="card"><h2 style="margin-top:0">Weekly digest</h2>
+<form method="post" action="/settings/digest">
+<div class="row"><div><label>Day</label><select name="day">{% for d in days %}<option {% if d == s.day %}selected{% endif %}>{{ d }}</option>{% endfor %}</select></div>
+<div><label>Time ({{ tz }})</label><input type="time" name="time" value="{{ s.time }}"></div></div>
+<label>Send to</label><input type="email" name="to" value="{{ s.to }}">
+<label style="font-weight:400"><input type="checkbox" name="enabled" value="1" {% if s.enabled %}checked{% endif %}> Enabled</label>
+<p><button class="btn primary">Save</button></p></form>
+<p class="small muted">Next run: {{ (next_run or '')[:16].replace('T',' ') }}. Email: {{ 'SMTP configured' if smtp else 'no SMTP configured; digests are saved and listed below' }}.</p>
+<form method="post" action="/digest/run" onsubmit="return confirm('Run Find new on every Radar account and send the digest now?')"><button class="btn">Run the digest now</button></form>
+<h3>Past digests</h3>{% for d in digests %}<div class="small"><a href="/digests/{{ d.id }}" target="_blank">{{ d.run_at[:16].replace('T',' ') }}</a>: {{ d.summary }}, {{ d.delivery }}</div>{% else %}<p class="empty">None yet.</p>{% endfor %}
+</div>
+<div class="card"><h2 style="margin-top:0">Research</h2>
+<div class="kv small"><div>Model</div><div>{{ model }}</div>
+<div>Apollo</div><div>{{ 'API key configured. Features the plan does not include are skipped and noted on each run.' if apollo else 'Not configured. Research uses public sources only; people findings are rated one level lower.' }}</div></div>
+<p class="small muted">Configuration is set through environment variables; see the README.</p></div>
+</div>
+{% endblock %}

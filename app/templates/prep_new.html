@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block body %}
+<h1>Prepare a meeting</h1>
+<div class="card" style="max-width:640px">
+<p class="muted small">Step 1 of 3. The tool first identifies the company and asks you to confirm it before any research runs.</p>
+<form method="post" action="/prep/new">
+<label>Product</label>
+<div class="radio-cards">
+ <label><input type="radio" name="product" value="amasol" required> amasol <span class="muted small">observability</span></label>
+ <label><input type="radio" name="product" value="klaricore"> klaricore <span class="muted small">IT reliability</span></label>
+ <label><input type="radio" name="product" value="both"> Both</label>
+</div>
+{% if account %}<input type="hidden" name="account_id" value="{{ account.id }}">
+<label>Company</label><p><b>{{ account.name }}</b> <span class="muted small">(already identified, profile loaded)</span></p>
+{% else %}<label>Company name</label><input type="text" name="company" required placeholder="e.g. Siemens Energy">{% endif %}
+<label>Meeting date</label><input type="date" name="meeting_date" required value="{{ today() }}">
+<p><button class="btn primary">Continue</button></p>
+</form></div>
+{% endblock %}

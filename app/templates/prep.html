@@ -1,0 +1,141 @@
+{% extends "base.html" %}{% import "macros.html" as m %}{% block body %}
+<h1>Meeting prep: {{ account.name if account else prep.company_input }} <span class="muted" style="font-weight:400;font-size:16px">{{ prep.meeting_date }}</span></h1>
+
+{% if prep.status == 'identifying' %}
+<div class="card"><h2 style="margin-top:0">Identifying the company</h2>
+<p>Looking for "{{ prep.company_input }}" on the company website, business registers and Apollo where available. This takes about a minute.</p>
+<ul class="steps"><li class="running"><span class="dot"></span>Searching</li></ul></div>
+
+{% elif prep.status == 'confirm' %}
+<div class="card"><h2 style="margin-top:0">Is this the right company?</h2>
+{% if candidates is mapping and candidates.error %}<div class="err">Identification failed: {{ candidates.error }}</div>{% endif %}
+<form method="post" action="/preps/{{ prep.id }}/confirm">
+{% if candidates is not mapping and candidates %}
+<div class="radio-cards">
+{% for c in candidates %}<label><input type="radio" name="choice" value="{{ loop.index0 }}" {% if loop.first %}checked{% endif %}>
+<b>{{ c.name }}</b>{% if c.legal_name and c.legal_name != c.name %} <span class="muted">({{ c.legal_name }})</span>{% endif %}<br>
+<span class="small">{{ c.description }}</span><br>
+<span class="small muted">{{ c.website }}{% if c.hq_country %} · {{ c.hq_country }}{% endif %}{% if c.parent %} · parent: {{ c.parent }}{% endif %}{% if c.industry %} · {{ c.industry }}{% endif %}</span>
+{% if c.note %}<br><span class="small"><i>{{ c.note }}</i></span>{% endif %}
+{% if c.apollo %}<br><span class="chip">Apollo: {{ c.apollo.employees or '?' }} employees</span>{% endif %}
+{% if c.existing %}<br><span class="chip tag-rep">Known account{% if c.existing.in_radar %}, in Radar{% endif %}</span>{% endif %}
+</label>{% endfor %}
+</div>
+<p><button class="btn primary">Yes, this one</button></p>
+{% else %}<p class="empty">No matching company found.</p>{% endif %}
+</form>
+<details {% if not candidates or candidates is mapping %}open{% endif %}><summary class="small">None of these. Search again with a hint</summary>
+<form method="post" action="/preps/{{ prep.id }}/confirm"><input type="hidden" name="choice" value="retry">
+<label>Hint <span class="muted">(website, country or what they do)</span></label><input type="text" name="hint" placeholder="e.g. siemens-energy.com, Germany">
+<p><button class="btn">Search again</button></p></form></details>
+</div>
+
+{% elif prep.status == 'radar' %}
+<div class="card"><h2 style="margin-top:0">Radar check</h2>
+{% if account.in_radar %}
+<p><b>{{ account.name }}</b> is in the Trusted Advisor Radar program. Its profile is loaded, and the research will run as <b>Find new</b>: it looks only for what is new since {{ (account.last_research_at or '')[:10] or 'the last update' }}.</p>
+<form method="post" action="/preps/{{ prep.id }}/radar"><input type="hidden" name="answer" value="keep"><button class="btn primary">Continue</button></form>
+{% else %}
+{% if account.last_research_at %}<p>We already have a saved profile for <b>{{ account.name }}</b> from an earlier prep (last research {{ account.last_research_at[:10] }}). It is loaded, and research will run as <b>Find new</b>.</p>{% endif %}
+<p><b>Add this account to the Trusted Advisor Radar program?</b></p>
+<p class="muted small">Yes: it is tracked from now on and appears in the weekly digest. No: research still runs and the profile is saved for later preps, but it is not tracked.</p>
+<form method="post" action="/preps/{{ prep.id }}/radar" class="row" style="max-width:400px">
+<button class="btn primary" name="answer" value="yes">Yes, add to Radar</button>
+<button class="btn" name="answer" value="no">No</button></form>
+{% endif %}</div>
+
+{% elif prep.status == 'describe' %}
+<div class="card" style="max-width:860px"><h2 style="margin-top:0">Describe the meeting</h2>
+<p class="muted small">About three minutes. Required fields are marked *.</p>
+<form method="post" action="/preps/{{ prep.id }}/describe" id="describe">
+<div class="row">
+<div><label>Product *</label><select name="product" id="product">
+{% set pr = prep.products %}
+<option value="amasol" {% if pr == 'amasol' %}selected{% endif %}>amasol</option>
+<option value="klaricore" {% if pr == 'klaricore' %}selected{% endif %}>klaricore</option>
+<option value="both" {% if pr == 'amasol,klaricore' %}selected{% endif %}>Both</option></select></div>
+<div><label>Meeting date *</label><input type="date" name="meeting_date" value="{{ prep.meeting_date }}" required></div>
+</div>
+<div class="row">
+{% for p in ['amasol','klaricore'] %}
+<div class="stage-box" data-p="{{ p }}"><label>{{ p }} meeting stage *</label>
+<select name="stage_{{ p }}"><option value="">Pick a stage</option>
+{% for s in stages[p] %}<option value="{{ s.key }}" {% if prep_stages.get(p) == s.key %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select></div>
+{% endfor %}
+</div>
+<div id="other-box"><label>If "Other": the meeting in one line</label><input type="text" name="other_stage_text" value="{{ prep.other_stage_text or '' }}"></div>
+<p class="tiny muted">Stages are typical, not enforced. Pick any stage, skip stages, or move one earlier.</p>
+
+<label>Attendees * <span class="muted">(name and title; profile link optional)</span></label>
+<div id="attendees">
+{% for a in (attendees or [{}]) %}
+<div class="row att"><input type="text" name="att_name" placeholder="Name" value="{{ a.name or '' }}"><input type="text" name="att_title" placeholder="Title" value="{{ a.title or '' }}"><input type="url" name="att_link" placeholder="Profile link (optional)" value="{{ a.link or '' }}"></div>
+{% endfor %}
+</div>
+<button type="button" class="btn small" id="add-att" style="margin-top:6px">Add attendee</button>
+
+<label>What a good result looks like *</label>
+<input type="text" name="good_result" placeholder="e.g. agree an ORS workshop date" value="{{ prep.good_result or '' }}" required>
+
+<div class="row">
+<div><label>Lead source *</label><select name="lead_kind" required>
+<option value="">Pick one</option>
+{% for k,ph in [('Referral','By whom?'),('Partner','Which partner?'),('Existing customer elsewhere in the group','Which company or country?'),('Inbound','Website, event; what did they engage with?'),('Cold outreach',''),('Other','Describe')] %}
+<option value="{{ k }}" data-ph="{{ ph }}" {% if lead.kind == k %}selected{% endif %}>{{ k }}</option>{% endfor %}</select></div>
+<div><label>Lead source detail</label><input type="text" name="lead_detail" id="lead_detail" value="{{ lead.detail or '' }}"></div>
+</div>
+
+<label>What you already know <span class="muted">(optional: earlier conversations, pasted emails and notes, internal context; stored as rep input)</span></label>
+<textarea name="known_text" rows="5">{{ prep.known_text or '' }}</textarea>
+
+<div class="row">
+<div><label>Partner involved <span class="muted">(optional: name and role in the deal)</span></label><input type="text" name="partner" value="{{ prep.partner or '' }}"></div>
+<div><label>Region <span class="muted">(optional; defaults to the company's main country)</span></label><input type="text" name="region" value="{{ prep.region or '' }}"></div>
+</div>
+<p><button class="btn primary">Start research</button></p>
+</form></div>
+
+{% elif prep.status in ('researching', 'writing') %}
+<div class="card" style="max-width:760px"><h2 style="margin-top:0">{{ 'Researching' if prep.status == 'researching' else 'Writing the brief' }}</h2>
+<p class="muted small">{% if prep.status == 'researching' %}Usually 3 to 6 minutes. {% else %}Usually 1 to 3 minutes. {% endif %}You can leave this page and come back; the work continues in the background.</p>
+<div id="progress">{% if run %}{{ m.steps(run) }}{% endif %}</div>
+<p class="small muted" id="cost"></p>
+</div>
+
+{% elif prep.status == 'checkback' %}
+{% if run and run.status in ('failed','partial') %}<div class="err">Some research steps did not finish: {{ run.error }}.
+{% if run.status == 'failed' %}<form method="post" action="/preps/{{ prep.id }}/restart" class="inline"><button class="btn small">Run the research again</button></form>{% endif %}</div>{% endif %}
+{% if run and run.apollo_note %}<div class="flash small">Apollo: {{ run.apollo_note }}. {% if not run.used_apollo %}People findings are rated one confidence level lower, and the brief notes this.{% endif %}</div>{% endif %}
+<div class="card"><h2 style="margin-top:0">Check back before the brief is written</h2>
+<p class="muted small">Confirm, correct or reject any finding. Corrections are stored as rep input and always win over research. You can also skip this step.</p>
+<form method="post" action="/preps/{{ prep.id }}/write">
+{% if gapq %}<h3>A few gaps that matter for this brief</h3>
+{% for g in gapq %}<div class="finding"><b>{{ g.text }}</b>
+<div class="row"><input type="text" name="gap_{{ g.question_id }}" placeholder="Your answer (leave empty if you don't know)">
+<label style="flex:0 0 auto;font-weight:400"><input type="checkbox" name="gapdk_{{ g.question_id }}" value="1"> I don't know (keep as an open question)</label></div></div>{% endfor %}{% endif %}
+<p><button class="btn primary">Write the brief</button> <button class="btn">Skip check back and write</button></p>
+</form>
+</div>
+{% for s, title, fs in groups %}
+<div class="card"><h3 style="margin-top:0">{{ s }}. {{ title }}</h3>
+{% if s == 7 %}{% for a in attendees %}{% set has = fs|selectattr('person')|selectattr('person.name','equalto',a.name)|list %}{% if not has %}<div class="finding"><b>{{ a.name }}</b>, {{ a.title }}: <span class="muted">nothing credible found; only what you provided is shown.</span></div>{% endif %}{% endfor %}{% endif %}
+{% for f in fs %}{{ m.finding(f, verdict=true) }}{% else %}<p class="empty">Not found.</p>{% endfor %}</div>
+{% endfor %}
+
+{% elif prep.status in ('ready', 'debriefed') %}
+<div class="card"><h2 style="margin-top:0">The brief is ready</h2>
+<p><a class="btn primary" href="/briefs/{{ brief_id }}">Open summary</a> <a class="btn" href="/briefs/{{ brief_id }}/pack">Open full prep pack</a>
+{% if prep.status == 'ready' %}<a class="btn" href="/preps/{{ prep.id }}/debrief">Debrief after the meeting</a>{% else %}<span class="chip">Debrief done</span>{% endif %}
+<a class="btn" href="/accounts/{{ account.id }}">Account profile</a></p></div>
+
+{% else %}
+<div class="card"><p>This prep was interrupted. <a href="/prep/new">Start again</a>.</p></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+const PREP_ID = {{ prep.id }}, PREP_STATUS = "{{ prep.status }}";
+if (["identifying","researching","writing"].includes(PREP_STATUS)) pollPrep(PREP_ID, PREP_STATUS);
+initDescribe(); initVerdicts();
+</script>
+{% endblock %}

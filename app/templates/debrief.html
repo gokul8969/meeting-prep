@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block body %}
+<h1>Debrief: {{ account.name }}, meeting on {{ prep.meeting_date }}</h1>
+{% if done %}<div class="flash">A debrief was already filled in on {{ done.created_at[:10] }}. Saving again adds to it.</div>{% endif %}
+<form method="post" action="/preps/{{ prep.id }}/debrief" class="card" style="max-width:860px">
+<p class="muted small">Two minutes. Everything here is stored as rep input (origin: debrief) and wins over research.</p>
+<label>What did we learn?</label><textarea name="learned" rows="5" placeholder="Free text"></textarea>
+
+<label>Who matters? <span class="muted">(tick the people who matter; change a role if needed; add people)</span></label>
+<div class="table-wrap"><table><tr><th>Matters</th><th>Name</th><th>Role</th></tr>
+{% for p in people %}<tr><td><input type="checkbox" name="pm_{{ p.id }}" value="1" {% if p.name|lower in att %}checked{% endif %}></td>
+<td>{{ p.name }}{% if p.name|lower in att %} <span class="chip">attendee</span>{% endif %}</td>
+<td><input type="text" name="prole_{{ p.id }}" value="{{ p.title or '' }}"></td></tr>{% endfor %}
+<tr><td>new</td><td><input type="text" name="new_name" placeholder="Name"></td><td><input type="text" name="new_role" placeholder="Role"></td></tr>
+<tr><td>new</td><td><input type="text" name="new_name" placeholder="Name"></td><td><input type="text" name="new_role" placeholder="Role"></td></tr>
+</table></div>
+
+<label>Which open questions were answered? <span class="muted">(write the answer next to any that were)</span></label>
+{% for q in questions %}<div class="finding"><div>{{ q.text }} <span class="chip">{{ q.kind }}</span>{% if q.person_name %}<span class="chip">{{ q.person_name }}</span>{% endif %}</div>
+<input type="text" name="q_{{ q.id }}" placeholder="Answer (leave empty if not answered)"></div>
+{% else %}<p class="empty">No open questions.</p>{% endfor %}
+
+<div class="row"><div><label>Agreed next step</label><input type="text" name="next_step" placeholder="e.g. ORS workshop with the IT operations team"></div>
+<div style="flex:0 1 200px"><label>By when</label><input type="date" name="next_by"></div></div>
+<p><button class="btn primary">Save debrief</button></p>
+</form>
+{% endblock %}

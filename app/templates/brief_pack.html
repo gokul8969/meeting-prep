@@ -1,0 +1,84 @@
+{% extends "standalone.html" if standalone else "base.html" %}{% import "brief_macros.html" as bm %}{% import "macros.html" as m %}
+{% block title %}Prep pack: {{ v.account.name }}{% endblock %}
+{% macro head(no) %}<h2 id="s{{ no }}"><span>{{ no }}. {{ PACK[no] }}</span>{% if not standalone %}<span class="tools no-print">
+<form method="post" action="/briefs/{{ v.brief.id }}/redo" class="inline" onsubmit="return confirm('Redo only this section? The research is not run again.')"><input type="hidden" name="section" value="{{ no }}"><button class="btn small">Redo section</button></form></span>{% endif %}</h2>{% endmacro %}
+{% macro plist(no) %}<ul class="points">{% for p in v.sections[no].points %}{{ bm.point(p, no, loop.index0, not standalone) }}{% else %}<li class="empty">Not found.</li>{% endfor %}</ul>{% endmacro %}
+{% block body %}
+{% if not standalone %}<div class="toolbar no-print">
+<a class="btn" href="/briefs/{{ v.brief.id }}">Summary</a>
+<a class="btn" href="/accounts/{{ v.account.id }}">Account profile</a>
+<span class="sp"></span>
+<span class="small muted">Download:</span>
+<a class="btn small" href="/briefs/{{ v.brief.id }}/download/pack.pdf">Prep pack PDF</a>
+<a class="btn small" href="/briefs/{{ v.brief.id }}/download/pack.html">Prep pack HTML</a>
+<a class="btn small" href="/briefs/{{ v.brief.id }}/download/all.zip">Both (zip)</a>
+</div>
+<div class="toolbar no-print small"><span id="redo-note" class="muted">{% if redo_running %}Redoing a section. The page updates when it is done.{% endif %}</span><span class="sp"></span>
+<details><summary>Version {{ v.brief.version }} of {{ v.versions|length }}</summary>
+<ul>{% for b in v.versions %}<li>{% if b.id == v.brief.id %}<b>v{{ b.version }}</b>{% else %}<a href="/briefs/{{ b.id }}/pack">v{{ b.version }}</a>{% endif %}: {{ b.note }} ({{ b.created_by }}, {{ b.created_at[:16].replace('T',' ') }})</li>{% endfor %}</ul>
+<p class="tiny muted">Each version is saved with the profile state it was built from.</p></details>
+</div>
+<p class="toolbar no-print tiny muted">Click any point to edit it. Edits to facts are stored back in the account profile as rep input.</p>{% endif %}
+
+<div class="doc">
+<h1>{{ v.account.name }}: prep pack</h1>
+<div class="sub">Meeting {{ v.prep.meeting_date }} · {{ v.products|join(' and ') }} · {{ v.stages_text }} · Goal: {{ v.prep.good_result }}<br>
+Version {{ v.brief.version }}, {{ v.brief.created_at[:16].replace('T',' ') }} UTC{% if standalone %} · Summary: <a href="summary.html">summary.html</a>{% endif %}</div>
+{% if not v.apollo_used %}<div class="notice">Apollo was not used for this research. People findings are rated one confidence level lower.</div>{% endif %}
+
+{{ head(1) }}
+{% for p in v.highlights %}<div class="hl"><span class="pt-text">{{ p.text }}</span> {{ bm.tags(p) }}{{ bm.srcs(p) }}</div>{% endfor %}
+<ul class="points">{% for no in range(2, 11) %}{% set kp = v.sections[no].key_point %}{% if kp and kp.text %}<li><a href="#s{{ no }}">{{ PACK[no] }}</a>: {{ kp.text }} {{ bm.tags(kp) }}</li>{% endif %}{% endfor %}</ul>
+
+{{ head(2) }}
+<div class="kv small" style="margin-bottom:8px">
+<div>Lead source</div><div>{{ v.lead_source.kind or 'not given' }}{% if v.lead_source.detail %}: {{ v.lead_source.detail }}{% endif %} <span class="chip tag-rep">Rep input</span></div>
+{% if v.prep.partner %}<div>Partner</div><div>{{ v.prep.partner }} <span class="chip tag-rep">Rep input</span></div>{% endif %}
+<div>Radar</div><div>{{ 'In the Trusted Advisor Radar program' if v.account.in_radar else 'Not tracked in Radar' }}</div>
+</div>
+{{ plist(2) }}
+{{ head(3) }}{{ plist(3) }}
+{{ head(4) }}{{ plist(4) }}
+{{ head(5) }}{{ plist(5) }}
+{{ head(6) }}{{ plist(6) }}
+{% if v.source_list.sources %}<p class="small"><b>This account's source list</b> ({{ v.source_list.industries|join(', ') }}; {{ v.source_list.countries|join(', ') }}):
+{% for s in v.source_list.sources %}<a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.name }}</a> <span class="muted">({{ s.kind }})</span>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+
+{{ head(7) }}
+<h3>Attendees</h3>
+{% for a in v.attendee_cards %}<div class="person"><b>{{ a.name }}</b>{% if a.title %}, {{ a.title }}{% endif %}
+{% if a.link %} · <a href="{{ a.link }}" target="_blank" rel="noopener">{{ 'LinkedIn profile' if 'linkedin' in a.link else 'Profile' }}</a>{% endif %}
+{% if a.points %}<ul class="points">{% for f in a.points %}<li>{% if f.rep_verdict == 'Corrected' and f.rep_correction %}{{ f.rep_correction }}{% else %}{{ f.statement }}{% endif %} {{ m.conf(f.confidence) }}{% if f.type == 'Inferred' %}<span class="chip tag-inf">Inference</span>{% elif f.type == 'Rep input' %}<span class="chip tag-rep">Rep input</span>{% endif %}<div class="src">{{ m.fsources(f) }}</div></li>{% endfor %}</ul>
+{% else %}<p class="small muted">Nothing credible found. Showing only what you provided.</p>{% endif %}
+{% if a.talking_points %}<p class="small"><b>Talking points:</b> {{ a.talking_points|join(' · ') }}</p>{% endif %}
+</div>{% endfor %}
+<h3>Wider buying committee</h3>{{ plist(7) }}
+
+{{ head(8) }}{{ plist(8) }}
+{% if v.case_names %}<p class="tiny muted">Case study customer names ({{ v.case_names|join(', ') }}): check before naming externally.</p>{% endif %}
+{{ head(9) }}{{ plist(9) }}
+{{ head(10) }}{{ plist(10) }}
+
+{{ head(11) }}
+{% for g in v.question_groups %}<h3>{{ g.theme }}{% if g.attendee %} <span class="chip">for {{ g.attendee }}</span>{% endif %}</h3>
+<ul class="points">{% for q in g.questions %}<li class="q">{{ q.text }} {% if q.product %}<span class="chip">{{ q.product }}</span>{% endif %}{% if q.checks_low %}<span class="chip tag-warn">Checks a {{ q.finding.confidence|lower }} confidence finding</span>{% endif %}
+{% if q.finding %}<div class="src">Checks: {{ q.finding.statement }}</div>{% endif %}</li>{% endfor %}</ul>
+{% else %}<p class="empty">No questions.</p>{% endfor %}
+
+{{ head(12) }}
+{% if v.plan.flow %}<ol>{% for s in v.plan.flow %}<li>{{ s }}</li>{% endfor %}</ol>{% endif %}
+{% if v.plan.next_step %}<p><b>Suggested next step:</b> {{ v.plan.next_step }}{% if v.plan.next_step_why %} <span class="muted">{{ v.plan.next_step_why }}</span>{% endif %}</p>{% endif %}
+{% if not standalone %}<details class="no-print small"><summary>Edit the plan</summary><form method="post" action="/briefs/{{ v.brief.id }}/plan">
+<label>Flow (one step per line)</label><textarea name="flow" rows="5">{{ (v.plan.flow or [])|join('\n') }}</textarea>
+<label>Next step</label><input type="text" name="next_step" value="{{ v.plan.next_step or '' }}"><p><button class="btn small">Save as new version</button></p></form></details>{% endif %}
+<h3>Tips <span class="muted small" style="font-weight:400">(information to consider, not rules)</span></h3>
+{% for t in v.tips %}<div class="tip">{{ t }}</div>{% endfor %}
+
+{{ head(13) }}
+<div class="table-wrap"><table><tr><th>Source</th><th>Tier</th><th>Date</th><th>Used for</th></tr>
+{% for s in v.sources %}<tr><td>{% if s.url %}<a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.publisher or (s.url|host) }}</a>{% else %}{{ s.publisher }}{% endif %}</td>
+<td>{{ s.tier if s.tier else 'Rep' }}</td><td>{{ s.published or 'unknown' }}</td><td class="small muted">{{ s.findings|length }} finding{{ 's' if s.findings|length != 1 }}</td></tr>{% endfor %}</table></div>
+<p class="tiny muted">Tiers: 1 the company itself and regulators; 2 reputable, analyst and trade press; 3 job postings, profiles, Apollo and data providers; 4 blogs, forums and social posts (only to back up other sources). High: a tier 1 source, or two independent tier 2 or 3 sources, from the last 12 months. Medium: one credible source, a strong pattern, or 12 to 24 months old. Low: a single weak signal, an inference, or tier 4 only; always to validate.</p>
+</div>
+{% endblock %}
+{% block scripts %}{% if not standalone %}<script>initBriefEdit({{ v.brief.id }}); {% if redo_running or request.query_params.get('redo') %}pollBrief({{ v.brief.id }});{% endif %}</script>{% endif %}{% endblock %}

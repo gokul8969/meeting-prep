@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block body %}
+<h1>Alerts</h1>
+<div class="tabs"><a href="/alerts" class="{{ 'on' if show == 'open' }}">Open</a><a href="/alerts?show=all" class="{{ 'on' if show == 'all' }}">All</a></div>
+{% for a in alerts %}<div class="card alert-{{ a.priority }}" id="a{{ a.id }}">
+<div class="row" style="align-items:baseline"><div style="flex:1 1 400px">
+<span class="conf {{ 'Low' if a.priority == 'High' else 'Medium' }}">{{ a.priority }}</span> <a href="/accounts/{{ a.account_id }}"><b>{{ a.account_name }}</b></a>
+<span class="chip">{{ a.product }}</span>{% if a.status != 'open' %}<span class="chip">{{ a.status }}{% if a.dismiss_reason %}: {{ a.dismiss_reason }}{% endif %}</span>{% endif %}
+<p style="margin:6px 0"><b>{{ a.what }}</b></p>
+<p class="small" style="margin:4px 0">Why it matters: {{ a.why }}</p>
+<p class="small" style="margin:4px 0">Suggested angle: {{ a.angle }}</p>
+<p class="tiny muted">{{ a.event_date }} · {% if a.source_url %}<a href="{{ a.source_url }}" target="_blank" rel="noopener">{{ a.source_name or 'source' }}</a>{% endif %} · <a href="/accounts/{{ a.account_id }}#f{{ a.finding_id }}">finding #{{ a.finding_id }}</a></p>
+</div>
+{% if a.status == 'open' %}<div style="flex:0 1 300px">
+<form method="post" action="/alerts/{{ a.id }}/prep"><button class="btn primary small">Start a meeting prep</button></form>
+<form method="post" action="/alerts/{{ a.id }}/dismiss" style="margin-top:8px"><select name="reason"><option value="not relevant">Not relevant</option><option value="already known">Already known</option><option value="wrong company">Wrong company</option><option value="other">Other</option></select>
+<input type="text" name="other" placeholder="Other reason" style="margin-top:4px"><button class="btn small" style="margin-top:4px">Dismiss</button></form>
+<form method="post" action="/accounts/{{ a.account_id }}/note" style="margin-top:8px"><input type="text" name="text" placeholder="Add a note to the account"><button class="btn small" style="margin-top:4px">Add note</button></form>
+</div>{% endif %}</div></div>
+{% else %}<p class="empty">No alerts. Alerts are created when Find new finds something that matters.</p>{% endfor %}
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}{% import "macros.html" as m %}{% block body %}
+<div class="row" style="align-items:flex-start">
+<div style="flex:1 1 400px"><h1 style="margin-bottom:2px">{{ a.name }}</h1>
+<div class="muted small">{{ a.legal_name }}{% if a.website %} · <a href="{{ a.website if '://' in a.website else 'https://' ~ a.website }}" target="_blank" rel="noopener">{{ a.website }}</a>{% endif %}{% if a.industry %} · {{ a.industry }}{% endif %}{% if a.countries %} · {{ a.countries }}{% endif %}</div>
+<div style="margin-top:6px">{% if a.in_radar %}<span class="chip status-Updated">In the Trusted Advisor Radar program since {{ (a.radar_added_at or '')[:10] }}</span>{% else %}<span class="chip">Not tracked in Radar</span>{% endif %}
+{% if a.last_research_at %}<span class="chip">Last research {{ a.last_research_at[:10] }}</span>{% endif %}
+{% if a.moved_at %}<span class="chip tag-rep">Moved {{ a.moved_at[:10] }}: {{ a.moved_note }}</span>{% endif %}</div></div>
+<div style="flex:0 1 auto;display:flex;gap:6px;flex-wrap:wrap">
+<a class="btn primary" href="/prep/new?account_id={{ a.id }}">Start a meeting prep</a>
+<form method="post" action="/accounts/{{ a.id }}/find-new" class="inline"><button class="btn" {% if run and run.status == 'running' %}disabled{% endif %}>Find new</button></form>
+<form method="post" action="/accounts/{{ a.id }}/radar" class="inline" {% if a.in_radar %}onsubmit="return confirm('Remove from the Radar program? The profile is kept but no longer tracked.')"{% endif %}><input type="hidden" name="on" value="{{ '0' if a.in_radar else '1' }}"><button class="btn">{{ 'Remove from Radar' if a.in_radar else 'Add to Radar' }}</button></form>
+</div></div>
+
+{% if run and run.status == 'running' %}<div class="card"><h3 style="margin-top:0">{{ 'Find new' if run.kind in ('find_new','digest') else 'Research' }} is running</h3><div id="runsteps">{{ m.steps(run) }}</div></div>{% endif %}
+{% if run and run.status in ('failed','partial') %}<div class="err small">The last research run had problems: {{ run.error }}</div>{% endif %}
+
+<div class="tabs" id="tabs">
+{% for s, t in SECTIONS.items() %}<a href="#sec{{ s }}">{{ s }}. {{ t }}</a>{% endfor %}
+<a href="#alerts">Alerts</a><a href="#notes">Notes</a><a href="#history">Change history</a>
+</div>
+
+<div class="card" id="sec1"><h2 style="margin-top:0">1. {{ SECTIONS[1] }}</h2>
+{% if summary.highlights %}<ul>{% for h in summary.highlights %}<li>{{ h.text }}{% for i in h.finding_ids %} <a class="tiny" href="#f{{ i }}">#{{ i }}</a>{% endfor %}</li>{% endfor %}</ul>
+{% if summary.changed %}<h3>What changed since the last update</h3><ul>{% for h in summary.changed %}<li>{{ h.text }}{% for i in h.finding_ids %} <a class="tiny" href="#f{{ i }}">#{{ i }}</a>{% endfor %}</li>{% endfor %}</ul>{% endif %}
+<p class="tiny muted">Regenerated {{ (summary.generated_at or '')[:16].replace('T',' ') }} UTC{% if summary.apollo_used == false %} · Apollo was not used{% endif %}</p>
+{% else %}<p class="empty">No research yet.</p>{% endif %}</div>
+
+{% for s in range(2, 11) %}{% if s != 7 %}
+<div class="card" id="sec{{ s }}"><h2 style="margin-top:0">{{ s }}. {{ SECTIONS[s] }}</h2>
+{% if s == 2 %}<div class="kv small" style="margin-bottom:8px"><div>Parent</div><div>{{ a.parent or 'none known' }}</div><div>Subsidiaries</div><div>{{ a.subsidiaries or 'none listed' }}</div><div>Size</div><div>{{ a.size or 'unknown' }}</div><div>Lead source</div><div>{{ a.lead_source or 'not given' }}</div><div>Product focus</div><div>{{ a.product_focus or 'both' }}</div></div>{% endif %}
+{% if s == 6 and source_list.sources %}<details class="small"><summary>Source list for this account ({{ source_list.sources|length }})</summary><ul>{% for x in source_list.sources %}<li><a href="{{ x.url }}" target="_blank" rel="noopener">{{ x.name }}</a> <span class="muted">{{ x.kind }}, {{ x.country }}: {{ x.why }}</span></li>{% endfor %}</ul></details>{% endif %}
+{% for f in by_sec[s] %}{{ m.finding(f, verdict=true) }}{% else %}<p class="empty">Not found.</p>{% endfor %}
+<details class="small"><summary>Add what you know</summary><form method="post" action="/accounts/{{ a.id }}/findings"><input type="hidden" name="section" value="{{ s }}"><textarea name="statement" rows="2" placeholder="Stored as rep input; it always ranks above web research"></textarea><button class="btn small">Add</button></form></details>
+</div>
+{% else %}
+<div class="card" id="sec7"><h2 style="margin-top:0">7. {{ SECTIONS[7] }}</h2>
+<p class="muted small" id="people">The proposed buying committee. Confirm, correct or remove people, or add people. Your changes are never overwritten by research.</p>
+{% for p in people %}<div class="finding" {% if p.rep_status == 'removed' %}style="opacity:.55"{% endif %}>
+<div><b>{{ p.name }}</b>{% if p.title %}, {{ p.title }}{% endif %} <span class="chip">{{ p.rep_status }}</span>{% if p.linkedin_url %} <a class="small" href="{{ p.linkedin_url }}" target="_blank" rel="noopener">{{ 'LinkedIn' if 'linkedin' in p.linkedin_url else 'profile' }}</a>{% endif %}
+{% if p.rep_note %}<span class="small muted"> · {{ p.rep_note }}</span>{% endif %}</div>
+{% if p.priorities %}<div class="small muted">Likely relevance: {{ p.priorities }}</div>{% endif %}
+{% for f in p.findings %}<div class="small" style="margin:4px 0 0 12px">{% if f.rep_verdict == 'Corrected' and f.rep_correction %}{{ f.rep_correction }}{% else %}{{ f.statement }}{% endif %} {{ m.ftags(f) }} <span class="tiny muted">{{ m.fsources(f) }}</span></div>{% endfor %}
+<div class="verdict">{% if p.rep_status != 'removed' %}
+<form method="post" action="/accounts/{{ a.id }}/people/{{ p.id }}" class="inline"><button class="btn small" name="action" value="confirm">Confirm</button></form>
+<details class="inline"><summary class="btn small">Correct</summary><form method="post" action="/accounts/{{ a.id }}/people/{{ p.id }}"><input type="hidden" name="action" value="correct"><input type="text" name="title" value="{{ p.title or '' }}" placeholder="Role"><input type="text" name="note" placeholder="Note"><button class="btn small">Save</button></form></details>
+<form method="post" action="/accounts/{{ a.id }}/people/{{ p.id }}" class="inline"><button class="btn small" name="action" value="remove">Remove</button></form>
+{% else %}<form method="post" action="/accounts/{{ a.id }}/people/{{ p.id }}" class="inline"><button class="btn small link" name="action" value="restore">restore</button></form>{% endif %}</div>
+</div>{% else %}<p class="empty">No people yet.</p>{% endfor %}
+{% set loose = by_sec[7]|rejectattr('person_id')|list %}{% for f in loose %}{{ m.finding(f, verdict=true) }}{% endfor %}
+<details class="small"><summary>Add a person</summary><form method="post" action="/accounts/{{ a.id }}/people" class="row"><input type="text" name="name" placeholder="Name" required><input type="text" name="title" placeholder="Role"><input type="url" name="link" placeholder="Profile link"><input type="text" name="note" placeholder="Note"><button class="btn small" style="flex:0 0 auto">Add</button></form></details>
+</div>
+{% endif %}{% endfor %}
+
+<div class="card" id="sec11"><h2 style="margin-top:0">11. {{ SECTIONS[11] }}</h2>
+<p class="muted small" id="questions">What we still don't know. The next meeting prep turns these into questions to ask; the debrief answers them back here.</p>
+{% for q in questions %}<div class="finding"><div>{% if q.status != 'open' %}<s class="muted">{{ q.text }}</s>{% else %}{{ q.text }}{% endif %}
+<span class="chip">{{ q.kind }}</span>{% if q.product %}<span class="chip">{{ q.product }}</span>{% endif %}{% if q.person_name %}<span class="chip">{{ q.person_name }}</span>{% endif %}
+{% if q.finding_id %}<a class="tiny" href="#f{{ q.finding_id }}">checks #{{ q.finding_id }}</a>{% endif %}</div>
+{% if q.status == 'answered' %}<div class="small">Answer: {{ q.answer }} <span class="tiny muted">({{ q.answered_by }}, {{ (q.answered_at or '')[:10] }})</span></div>
+{% elif q.status == 'open' %}<form method="post" action="/accounts/{{ a.id }}/questions/{{ q.id }}" class="row" style="margin-top:4px"><input type="text" name="answer" placeholder="Answer"><button class="btn small" style="flex:0 0 auto">Save answer</button><button class="btn small link" style="flex:0 0 auto" name="action" value="drop">drop</button></form>{% endif %}
+</div>{% else %}<p class="empty">No open questions.</p>{% endfor %}</div>
+
+<div class="card" id="sec12"><h2 style="margin-top:0">12. {{ SECTIONS[12] }}</h2>
+<div class="table-wrap"><table><tr><th>Source</th><th>Tier</th><th>Date</th><th>Findings</th></tr>
+{% for s in sources %}<tr><td><a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.publisher or (s.url|host) }}</a></td><td>{{ s.tier }}</td><td>{{ s.published or 'unknown' }}</td><td>{{ s.n }}</td></tr>{% else %}<tr><td colspan="4" class="empty">No sources yet.</td></tr>{% endfor %}</table></div></div>
+
+<div class="card" id="alerts"><h2 style="margin-top:0">Alerts</h2>
+{% for al in alerts %}<div class="finding alert-{{ al.priority }}" style="padding-left:10px"><span class="conf {{ 'Low' if al.priority == 'High' else 'Medium' }}">{{ al.priority }}</span> {{ al.what }} <span class="chip">{{ al.status }}{% if al.dismiss_reason %}: {{ al.dismiss_reason }}{% endif %}</span>
+<div class="small muted">Why: {{ al.why }} · Angle: {{ al.angle }}</div></div>{% else %}<p class="empty">No alerts.</p>{% endfor %}</div>
+
+<div class="grid g2">
+<div class="card" id="notes"><h2 style="margin-top:0">Notes</h2>
+<form method="post" action="/accounts/{{ a.id }}/note"><textarea name="text" rows="2" placeholder="Add a note (stored as rep input)"></textarea><button class="btn small">Add note</button></form>
+{% for n in notes %}<div class="finding small">{{ n.text }}<div class="meta">{{ n.author }}, {{ n.created_at[:10] }}</div></div>{% endfor %}</div>
+<div class="card" id="history"><h2 style="margin-top:0">Change history</h2>
+{% for t in timeline %}<div class="finding small"><span class="chip">{{ t.kind }}</span> {{ t.text }}{% if t.link %} <a href="{{ t.link }}">open</a>{% endif %}<div class="meta">{{ t.created_at[:16].replace('T',' ') }}</div></div>{% else %}<p class="empty">Nothing yet.</p>{% endfor %}
+<h3>Meeting preps</h3>{% for p in preps %}<div class="small"><a href="/preps/{{ p.id }}">{{ p.meeting_date }}</a> <span class="chip">{{ p.status }}</span>{% if p.status == 'ready' %} <a href="/preps/{{ p.id }}/debrief">debrief</a>{% endif %}</div>{% else %}<p class="empty">None.</p>{% endfor %}
+{% if superseded %}<details><summary class="small">Superseded findings ({{ superseded|length }}), kept with their dates</summary>{% for f in superseded %}{{ m.finding(f) }}{% endfor %}</details>{% endif %}
+</div></div>
+{% endblock %}
+{% block scripts %}<script>initVerdicts();{% if run and run.status == 'running' %}pollRun({{ run.id }}, document.getElementById("runsteps"));{% endif %}</script>{% endblock %}

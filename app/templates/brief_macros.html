@@ -1,0 +1,10 @@
+{% macro tags(p) %}<span class="pt-tags">{% if p.confidence %}<span class="conf {{ p.confidence }}">{{ p.confidence }}</span>{% endif %}
+{% if p.label %}<span class="chip {{ 'tag-rep' if 'Rep' in p.label else ('tag-warn' if 'validate' in p.label else 'tag-inf') }}">{{ p.label }}</span>{% endif %}
+{% if p.kind == 'not found' %}<span class="chip">Not found</span>{% endif %}
+{% if p.kind == 'knowledge' %}<span class="chip">Product knowledge</span>{% endif %}
+{% if p.conflict %}<span class="chip tag-warn">Sources disagree</span>{% endif %}
+{% if p.stale %}<span class="chip tag-warn">Possibly out of date</span>{% endif %}</span>{% endmacro %}
+
+{% macro srcs(p) %}{% if p.sources %}<div class="src">{% for s in p.sources %}{% if s.url %}<a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.publisher }}</a>{% else %}{{ s.publisher }}{% endif %}{% if s.published and s.tier %} ({{ s.published }}){% endif %}{% if not loop.last %}; {% endif %}{% endfor %}{% for r in p.reasons %} · {{ r }}{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro point(p, sec, i, editable) %}<li {% if editable %}data-edit="{{ sec }}|{{ i }}" data-hasfindings="{{ '1' if p.finding_ids else '0' }}"{% endif %}><span class="pt-text">{{ p.text }}</span> {{ tags(p) }}{{ srcs(p) }}</li>{% endmacro %}

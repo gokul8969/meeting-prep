@@ -1,0 +1,17 @@
+{
+  "amasol": [
+    {"key": "first_meeting", "name": "First meeting", "focus": "Who amasol is as a trusted advisor, our angle into this account, a few sharp questions"},
+    {"key": "discovery", "name": "Discovery", "focus": "Pains, stakeholders, the outcomes they want, a first guess at maturity"},
+    {"key": "ors", "name": "ORS workshop or questionnaire", "focus": "Which format fits, who should take part, what to prepare"},
+    {"key": "recommendations", "name": "Recommendations", "focus": "Turning findings into recommendations and agreeing what it would take to act"},
+    {"key": "poc", "name": "POC", "focus": "Scope, success measures, stakeholders, open questions"},
+    {"key": "other", "name": "Other", "focus": "The rep describes the meeting in one line"}
+  ],
+  "klaricore": [
+    {"key": "sla_pitch", "name": "SLA pitch", "focus": "Which of the four pains likely applies, the sourcing model, the service-integrator role"},
+    {"key": "use_cases", "name": "Use cases", "focus": "Which use cases and case studies fit this account"},
+    {"key": "demo", "name": "Demo", "focus": "What to show, using their likely providers and SLAs"},
+    {"key": "poc", "name": "POC", "focus": "The three POC questions: providers and SLAs, where the data lives, who uses the results"},
+    {"key": "other", "name": "Other", "focus": "The rep describes the meeting in one line"}
+  ]
+}

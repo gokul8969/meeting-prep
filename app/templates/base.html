@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Meeting Prep{% endblock %}</title>
+<link rel="stylesheet" href="/static/app.css"></head>
+<body>
+<header class="top"><div class="in">
+  <a class="brand" href="/">Meeting Prep <span>&amp;</span> Radar</a>
+  <nav>
+    <a href="/prep/new">New prep</a>
+    <a href="/radar">Radar</a>
+    <a href="/alerts">Alerts {% if open_alerts %}<span class="badge">{{ open_alerts }}</span>{% endif %}</a>
+    <a href="/">Debriefs {% if due_debriefs %}<span class="badge">{{ due_debriefs }}</span>{% endif %}</a>
+    <a href="/knowledge">Knowledge</a>
+    <a href="/settings">Settings</a>
+    <a href="/costs">Costs</a>
+  </nav>
+  <div class="me">{{ user }} · <a href="/logout">Log out</a></div>
+</div></header>
+<main>
+{% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+{% block body %}{% endblock %}
+</main>
+<script src="/static/app.js"></script>
+{% block scripts %}{% endblock %}
+</body></html>

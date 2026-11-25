@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>User Journey</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 18mm 17mm; }
+  :root {
+    --navy: #1f4e8c; --ink: #222; --muted: #666; --line: #c9d3e6;
+    --rep-bg: #e5ecf8; --rep-bd: #1f4e8c;
+    --rec-bg: #efe6f6; --rec-bd: #7b4fb0;
+    --res-bg: #fdf0dc; --res-bd: #d08a1c;
+    --out-bg: #e2f1e5; --out-bd: #2e8b4e;
+    --mt-bg:  #f1f1f1; --mt-bd:  #7a7a7a;
+    --red-bg: #fbe6e6; --red-bd: #b23a3a;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: "IBM Plex Sans", "FreeSans", sans-serif; color: var(--ink); font-size: 10pt; line-height: 1.4; margin: 0; background: #fff; }
+  h1 { color: var(--navy); font-size: 24pt; margin: 0 0 2pt; }
+  .sub { color: var(--muted); font-size: 10pt; margin-bottom: 8pt; }
+  h2 { color: var(--navy); font-size: 14pt; margin: 10pt 0 5pt; padding-bottom: 3pt; border-bottom: 1.2pt solid var(--line); }
+  h3 { color: var(--navy); font-size: 11.5pt; margin: 10pt 0 4pt; }
+  p { margin: 0 0 6pt; }
+  ul { margin: 0 0 6pt; padding-left: 16pt; }
+  li { margin-bottom: 2pt; }
+  .page { page-break-before: always; }
+  .rule { border-left: 5pt solid var(--red-bd); background: var(--red-bg); padding: 9pt 12pt; margin: 8pt 0 12pt; }
+  .rule b.t { display: block; color: var(--red-bd); font-size: 12pt; margin-bottom: 3pt; }
+  .quote { border-left: 4pt solid var(--navy); background: #edf1f8; padding: 6pt 12pt; font-style: italic; margin: 6pt 0 0; }
+  /* flow */
+  .flow { width: 88%; margin: 6pt auto 0; }
+  .box { border: 1.3pt solid; border-radius: 6pt; padding: 3pt 10pt; text-align: center; }
+  .box b { display: block; font-size: 10.5pt; }
+  .box span { font-size: 8.5pt; }
+  .arrow { text-align: center; color: #888; font-size: 8pt; line-height: 1; margin: 0; }
+  .rep { background: var(--rep-bg); border-color: var(--rep-bd); }
+  .rec { background: var(--rec-bg); border-color: var(--rec-bd); }
+  .res { background: var(--res-bg); border-color: var(--res-bd); }
+  .out { background: var(--out-bg); border-color: var(--out-bd); }
+  .mt  { background: var(--mt-bg);  border-color: var(--mt-bd); }
+  .loop { border: 1pt dashed var(--rec-bd); color: var(--rec-bd); border-radius: 6pt; padding: 5pt 10pt; text-align: center; font-size: 9.5pt; margin-top: 4pt; }
+  /* step header */
+  .step { display: flex; align-items: center; gap: 8pt; margin: 10pt 0 4pt; }
+  .num { flex: 0 0 auto; width: 22pt; height: 22pt; border-radius: 50%; color: #fff; font-weight: 700; text-align: center; line-height: 22pt; font-size: 11pt; }
+  .step h2 { border: 0; margin: 0; padding: 0; }
+  .n-rep { background: var(--rep-bd); } .n-res { background: var(--res-bd); } .n-out { background: var(--out-bd); }
+  .n-mt { background: var(--mt-bd); } .n-rec { background: var(--rec-bd); }
+  table { width: 100%; border-collapse: collapse; margin: 3pt 0 6pt; font-size: 9pt; }
+  th { background: #edf1f8; color: var(--navy); text-align: left; padding: 3pt 6pt; border: 0.8pt solid var(--line); }
+  td { padding: 3pt 6pt; border: 0.8pt solid var(--line); vertical-align: top; }
+  .tag { display: inline-block; font-size: 8pt; font-weight: 700; padding: 0 5pt; border-radius: 3pt; color: #fff; }
+  .t-rep { background: var(--rep-bd); } .t-conf { background: var(--out-bd); } .t-lik { background: var(--res-bd); } .t-unk { background: #888; }
+  .small { font-size: 9pt; color: var(--muted); }
+  /* gap tree */
+  .tree { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6pt; margin: 6pt 0; }
+  .tree .box { text-align: left; }
+  .keep { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<h1>User Journey</h1>
+<div class="sub">Meeting preparation for amasol and klaricore sales reps</div>
+
+<div class="rule">
+  <b class="t">The one rule: the rep's word is final</b>
+  Whatever the rep says overrides everything else: web research, Apollo, Treg and anything saved from earlier.
+  If research disagrees with the rep, the brief uses the rep's version. The difference is only shown to the rep as a note
+  ("Apollo lists her as Deputy CIO, you said CIO; using CIO"), never used to change what the rep said.
+</div>
+
+<h2>The journey at a glance</h2>
+<div class="flow">
+  <div class="box mt"><b>A rep has a customer meeting coming up</b></div>
+  <div class="arrow">↓</div>
+  <div class="box rep"><b>1. Create the customer</b><span>Company name; the right company is confirmed</span></div>
+  <div class="arrow">↓</div>
+  <div class="box rep"><b>2. Rep puts in everything they have</b><span>Company, who is attending and their designations, agenda, good outcome, emails and notes</span></div>
+  <div class="arrow">↓</div>
+  <div class="box rep"><b>3. Gap check</b><span>Missing info is asked from the rep; what the rep doesn't know goes to research</span></div>
+  <div class="arrow">↓</div>
+  <div class="box rec"><b>4. Check the customer record</b><span>Start from everything already learned about this customer</span></div>
+  <div class="arrow">↓</div>
+  <div class="box res"><b>5. Research</b><span>Web (websites, reports, conference pages, tenders, news…), Apollo, Treg</span></div>
+  <div class="arrow">↓</div>
+  <div class="box res"><b>6. Make sense of it</b><span>What matters for what we sell; confirmed vs. guess; guesses and open gaps become questions</span></div>
+  <div class="arrow">↓</div>
+  <div class="box out"><b>7. Meeting brief</b><span>Company, people, likely problems, questions to ask, suggested next step</span></div>
+  <div class="arrow">↓</div>
+  <div class="box mt"><b>8. The meeting</b><span>Rep uses the brief and asks the questions</span></div>
+  <div class="arrow">↓</div>
+  <div class="box rec"><b>9. Rep notes what they learned</b><span>Saved to the customer record as final</span></div>
+  <div class="loop">↺ Next meeting with this customer starts from step 4 with everything already known, and research looks only for what is new.<br>
+  For important customers, the rep is also told when something big changes, even with no meeting booked.</div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page"></div>
+<div class="step"><div class="num n-rep">1</div><h2>Create the customer</h2></div>
+<ul>
+  <li>The rep creates a new customer by entering the <b>company name</b> (the website is optional).</li>
+  <li>The system finds the company and shows what it found: legal name, headquarters, and the group it belongs to
+      (e.g. "Siemens AG, Munich, not Siemens Healthineers?").</li>
+  <li>The rep confirms or corrects it. Their choice is final.</li>
+  <li>If the customer already exists, the rep goes into that customer, and everything known about it is already there.</li>
+</ul>
+
+<div class="step"><div class="num n-rep">2</div><h2>Rep puts in everything they have</h2></div>
+<p>The rep enters what they know: typed, pasted (emails, invites, notes) or as files. The system picks out the standard details:</p>
+<table>
+  <tr><th style="width:32%">Standard detail</th><th style="width:16%">Needed?</th><th>Example</th></tr>
+  <tr><td><b>Company name</b></td><td>Required</td><td>Müller Logistik GmbH</td></tr>
+  <tr><td><b>Who is attending</b></td><td>Required</td><td>Maria Huber, Tom Berger, Anna Klein</td></tr>
+  <tr><td><b>Their designations</b></td><td>Required</td><td>CIO · Head of IT Operations · <i>unknown</i></td></tr>
+  <tr><td><b>Agenda / purpose of the meeting</b></td><td>Required</td><td>First meeting to discuss their monitoring setup</td></tr>
+  <tr><td><b>What a good outcome looks like</b></td><td>Required</td><td>Agree a workshop with their operations team</td></tr>
+  <tr><td><b>Meeting date</b></td><td>Required</td><td>12 March, on site</td></tr>
+  <tr><td><b>Who from our side attends</b></td><td>Optional</td><td>Rep + solution architect</td></tr>
+  <tr><td><b>Anything already known</b></td><td>Optional</td><td>Past emails, call notes, an RFP, a referral</td></tr>
+</table>
+<p class="small">Everything the rep puts in is tagged <span class="tag t-rep">REP</span> and is final.</p>
+
+<div class="step"><div class="num n-rep">3</div><h2>Gap check: fill in what is missing</h2></div>
+<p>The system compares what the rep gave against the standard details, does one full check, and shows <b>one list of all gaps</b>. Each gap is answered by the rep or handed on to research:</p>
+<table>
+  <tr><th style="width:30%">Kind of gap</th><th>What happens</th><th style="width:30%">Example</th></tr>
+  <tr><td><b>Only the rep can know</b><br><span class="small">agenda, good outcome, meeting date, who attends</span></td>
+      <td>Asked from the rep. If the rep skips it, the brief says it is missing.</td>
+      <td>"What would a good outcome be for this meeting?"</td></tr>
+  <tr><td><b>The rep might know</b><br><span class="small">designations, earlier contact, current tools</span></td>
+      <td>Asked from the rep with a <b>"I don't know"</b> answer. "I don't know" moves it to the research list.</td>
+      <td>"What is Anna Klein's role?" → I don't know → research</td></tr>
+  <tr><td><b>Research questions</b><br><span class="small">things the rep wouldn't know</span></td>
+      <td>Go straight to the research list, together with the rep's "I don't know" answers.</td>
+      <td>"Which monitoring tools do they use today?"</td></tr>
+</table>
+<ul>
+  <li>The rep can answer all gaps at once, answer some, or start research anyway.</li>
+  <li>The research list is shown to the rep before research starts, so they know what will be looked for.</li>
+</ul>
+
+<div class="step"><div class="num n-rec">4</div><h2>Check the customer record</h2></div>
+<ul>
+  <li>Before searching, the system loads everything already known about this customer: facts from earlier research, the rep's notes from past meetings, people met before, and questions still open.</li>
+  <li>Anything already known is not searched again, unless it is old enough to check again. Research focuses on what is new since last time. Earlier statements from reps stay final.</li>
+</ul>
+
+<!-- PAGE 3 -->
+<div class="page"></div>
+<div class="step"><div class="num n-res">5</div><h2>Research</h2></div>
+<p>Research runs on three sources at the same time, and each topic and each attendee is researched separately:</p>
+<table>
+  <tr><th style="width:18%">Source</th><th>What it gives</th></tr>
+  <tr><td><b>Web</b></td><td>Company websites, annual reports, investor material, press releases, regulators and business registers, conference pages and speaker lists, tender portals, news and trade press, job postings, vendor case studies, engineering blogs, public code, interviews</td></tr>
+  <tr><td><b>Apollo</b></td><td>Company data (size, revenue, industry, tech stack, headcount trends, job postings) and people data (title, seniority, work history, LinkedIn profile)</td></tr>
+  <tr><td><b>Treg</b></td><td>Access to many data providers in one place: people and company enrichment, funding, buying signals, and a second source to check Apollo against</td></tr>
+</table>
+
+<h3>Research method: which sources count most</h3>
+<table>
+  <tr><th style="width:6%">#</th><th>Source</th><th style="width:30%">Used for</th></tr>
+  <tr><td>1</td><td>The company itself (website, annual reports, investor material, press releases) and regulators</td><td>Facts</td></tr>
+  <tr><td>2</td><td>Reputable press, analysts and trade press</td><td>Facts</td></tr>
+  <tr><td>3</td><td>Job postings (careers pages, job boards), professional profiles, and data providers like Apollo and Treg</td><td>Facts and signals</td></tr>
+  <tr><td>4</td><td>Blogs, forums and social posts</td><td>Only to back up other sources</td></tr>
+</table>
+<p class="small">When sources disagree, the higher one wins. Above all of them: the rep's word.</p>
+
+<h3>By topic, here is where it looks</h3>
+<table>
+  <tr><th style="width:20%">Topic</th><th>Where it looks</th></tr>
+  <tr><td><b>Tech stack</b></td><td>Job postings (the strongest signal), staff skills on public profiles, vendor case studies, engineering blogs, conference talks and public code</td></tr>
+  <tr><td><b>Company identity</b></td><td>Business registers like Companies House, Handelsregister or India's MCA</td></tr>
+  <tr><td><b>Outsourcing</b></td><td>Partner press releases and tender portals like TED (EU), Contracts Finder (UK) or GeM (India)</td></tr>
+  <tr><td><b>Trigger events</b></td><td>News, regulator announcements and outage trackers</td></tr>
+  <tr><td><b>People</b></td><td>LinkedIn profiles found via web search (no logging in or scraping), leadership pages, interviews and speaker lists</td></tr>
+</table>
+
+<ul>
+  <li>Every finding is kept with its <b>source and date</b>, so the rep can open it.</li>
+  <li>Every item on the research list from step 3 is either found, partly found, or marked as not found.</li>
+  <li>The rep sees progress while research runs (e.g. "Company ✓ · Tech stack … · Attendee 2 of 3 …").</li>
+</ul>
+
+<!-- PAGE 4 -->
+<div class="page"></div>
+<div class="step"><div class="num n-res">6</div><h2>Make sense of it</h2></div>
+<ul>
+  <li><b>Pick out what matters for what we sell:</b> their current tools, recent changes and likely problems.</li>
+  <li><b>Separate confirmed from guess.</b> Every statement in the brief carries one tag:</li>
+</ul>
+<table>
+  <tr><th style="width:16%">Tag</th><th>Means</th></tr>
+  <tr><td><span class="tag t-rep">REP</span></td><td>The rep said it. Final; overrides everything.</td></tr>
+  <tr><td><span class="tag t-conf">CONFIRMED</span></td><td>Backed by a strong source (rank 1–2), or by two independent sources.</td></tr>
+  <tr><td><span class="tag t-lik">LIKELY</span></td><td>A guess from evidence, shown with its reason ("their job ads ask for X and Y").</td></tr>
+  <tr><td><span class="tag t-unk">UNKNOWN</span></td><td>Important, but neither the rep nor research could answer it.</td></tr>
+</table>
+<ul>
+  <li><b>Apply the rep's word.</b> Where research disagrees with the rep, the rep's version is used and the difference is noted for the rep only.</li>
+  <li><b>Turn guesses and gaps into questions</b> (see "What happens to a gap" below).</li>
+</ul>
+
+<h3>What happens to a gap</h3>
+<div class="keep">
+<div class="box rep" style="text-align:left"><b>A gap is found in step 3</b><span>e.g. "Anna Klein's role" or "which monitoring tools they use"</span></div>
+<div class="arrow">↓ asked from the rep</div>
+<div class="tree">
+  <div class="box rep"><b>Rep answers</b><span>Saved as <span class="tag t-rep">REP</span>. Final. Done.</span></div>
+  <div class="box res" style="grid-column: span 2"><b>Rep doesn't know → research</b><span>Looked for on the web, Apollo and Treg</span></div>
+</div>
+<div class="arrow" style="margin-left:33%">↓</div>
+<div class="tree">
+  <div></div>
+  <div class="box out"><b>Found</b><span><span class="tag t-conf">CONFIRMED</span> in the brief with its source; or <span class="tag t-lik">LIKELY</span> plus a <b>curated question</b> to check it</span></div>
+  <div class="box mt"><b>Not found</b><span><span class="tag t-unk">UNKNOWN</span> → becomes an <b>open question</b> for the rep to ask in the meeting</span></div>
+</div>
+<div class="arrow">↓ in the meeting</div>
+<div class="box rec"><b>Answered in the meeting → the rep notes it → saved as <span class="tag t-rep">REP</span> in the customer record</b></div>
+</div>
+
+<!-- PAGE 5 -->
+<div class="page"></div>
+<div class="step"><div class="num n-out">7</div><h2>The meeting brief</h2></div>
+<p>Short enough to read in a few minutes before the meeting. Every line carries its tag and, where it came from research, its source.</p>
+<table>
+  <tr><th style="width:28%">Section</th><th>What is in it</th></tr>
+  <tr><td><b>What's new since last time</b></td><td>Only for customers met before: changes since the last meeting</td></tr>
+  <tr><td><b>Meeting at a glance</b></td><td>Date, agenda, good outcome, who attends from both sides (from the rep)</td></tr>
+  <tr><td><b>The company</b></td><td>What they do, size, current situation, recent changes, their tech stack and IT partners</td></tr>
+  <tr><td><b>Each person attending</b></td><td>Designation, background, what they likely care about, how to approach them, what we discussed with them before</td></tr>
+  <tr><td><b>Likely problems we can help with</b></td><td>Ranked; each with the evidence behind it and what we offer that fits</td></tr>
+  <tr><td><b>Questions to ask</b></td><td>Two lists, see below</td></tr>
+  <tr><td><b>Suggested next step</b></td><td>The next step to aim for, tied to the rep's good outcome</td></tr>
+  <tr><td><b>Sources</b></td><td>Every source used, with dates</td></tr>
+</table>
+
+<h3>Questions to ask</h3>
+<table>
+  <tr><th style="width:28%">List</th><th>What goes in it</th><th style="width:32%">Example</th></tr>
+  <tr><td><b>A. Open questions</b><br><span class="small">nobody could answer</span></td>
+      <td>Gaps that neither the rep knew nor research could find. The rep should get these answered in the meeting.</td>
+      <td>"Who owns monitoring today: central IT or each business unit?"</td></tr>
+  <tr><td><b>B. Curated questions</b><br><span class="small">to check guesses and move the meeting forward</span></td>
+      <td>Smart questions built from research: they check the <span class="tag t-lik">LIKELY</span> items, open up the likely problems, and lead towards the next step. Grouped by topic and by person.</td>
+      <td>"Your job ads mention building an observability team. What's driving that?" (for Tom Berger)</td></tr>
+</table>
+
+<div class="step"><div class="num n-mt">8</div><h2>The meeting</h2></div>
+<ul>
+  <li>The rep uses the brief before and during the meeting (it reads well on a phone).</li>
+  <li>The rep asks the questions and can tick each one off and jot a short answer as they go.</li>
+</ul>
+
+<div class="step"><div class="num n-rec">9</div><h2>Rep notes what they learned</h2></div>
+<ul>
+  <li>After the meeting, the rep notes what they learned, in any form: typed notes, a pasted email, the ticked questions.</li>
+  <li>The system turns this into facts for the customer record. The rep sees what will be saved and confirms it.</li>
+  <li>Everything the rep says is saved as <span class="tag t-rep">REP</span> and is final: answered questions are closed, guesses are confirmed or dropped, and wrong research facts are replaced.</li>
+  <li>Agreed next steps are saved, ready for the next meeting.</li>
+</ul>
+
+<div class="loop" style="margin-top:6pt">↺ <b>Next time:</b> the rep goes into the same customer, enters the new meeting's details, and the brief starts from everything already known; research looks only for what is new.<br>
+<b>Important customers:</b> the rep is told when something big changes (new leaders, takeovers, outages, big IT tenders), even with no meeting booked.</div>
+
+<div class="quote">Help our reps prepare for any customer meeting in minutes, and remember everything we learn about each customer so every meeting starts smarter than the last.</div>
+
+</body>
+</html>

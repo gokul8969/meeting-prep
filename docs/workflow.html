@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Workflow</title>
+<style>
+  @page { size: A4; margin: 18mm 18mm; }
+  body { font-family: "IBM Plex Sans", "FreeSans", sans-serif; color: #222; margin: 0; background: #fff; font-size: 10pt; }
+  h1 { color: #1f4e8c; font-size: 24pt; margin: 0 0 2pt; }
+  .sub { color: #666; font-size: 10pt; margin-bottom: 12pt; }
+  .flow { width: 82%; margin: 0 auto; }
+  .box { border: 1.4pt solid; border-radius: 6pt; padding: 5pt 10pt; text-align: center; }
+  .box b { display: block; font-size: 11pt; }
+  .box span { font-size: 9pt; }
+  .arrow { text-align: center; color: #888; font-size: 11pt; line-height: 1.2; }
+  .rep { background: #e5ecf8; border-color: #1f4e8c; }
+  .rec { background: #efe6f6; border-color: #7b4fb0; }
+  .res { background: #fdf0dc; border-color: #d08a1c; }
+  .out { background: #e2f1e5; border-color: #2e8b4e; }
+  .mt  { background: #f1f1f1; border-color: #7a7a7a; }
+  .split { display: flex; gap: 8pt; }
+  .split .box { flex: 1; }
+  .rule { margin: 14pt auto 0; width: 82%; border: 1.4pt solid #b23a3a; background: #fbe6e6; color: #b23a3a; border-radius: 6pt; padding: 6pt 10pt; text-align: center; font-size: 10pt; }
+  .loop { border: 1pt dashed #7b4fb0; color: #7b4fb0; border-radius: 6pt; padding: 5pt 10pt; text-align: center; font-size: 9.5pt; margin-top: 4pt; }
+</style>
+</head>
+<body>
+<h1>Workflow</h1>
+<div class="sub">Meeting preparation for amasol and klaricore sales reps</div>
+
+<div class="flow">
+  <div class="box rep"><b>1. Create the customer</b><span>Company name</span></div>
+  <div class="arrow">↓</div>
+  <div class="box rep"><b>2. Rep enters what they know</b><span>Company, who is attending, their designations, agenda, good outcome, notes</span></div>
+  <div class="arrow">↓</div>
+  <div class="box rep"><b>3. Gap check</b><span>Anything missing is asked from the rep</span></div>
+  <div class="arrow">↓</div>
+  <div class="split">
+    <div class="box rep"><b>Rep knows</b><span>Answer is saved as final</span></div>
+    <div class="box res"><b>Rep doesn't know</b><span>Added to the research list</span></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box rec"><b>4. Check the customer record</b><span>Start from everything already known</span></div>
+  <div class="arrow">↓</div>
+  <div class="box res"><b>5. Research</b><span>Web (websites, reports, conference pages, tenders, news), Apollo, Treg</span></div>
+  <div class="arrow">↓</div>
+  <div class="box res"><b>6. Make sense of it</b><span>What matters for what we sell · confirmed vs. guess</span></div>
+  <div class="arrow">↓</div>
+  <div class="box out"><b>7. Meeting brief</b><span>Company · people attending · likely problems · next step</span></div>
+  <div class="arrow">↓</div>
+  <div class="split">
+    <div class="box out"><b>Open questions</b><span>Not found by research or the rep</span></div>
+    <div class="box out"><b>Curated questions</b><span>To check guesses and move the meeting forward</span></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box mt"><b>8. The meeting</b><span>Rep uses the brief and asks the questions</span></div>
+  <div class="arrow">↓</div>
+  <div class="box rec"><b>9. Rep notes what they learned</b><span>Saved to the customer record</span></div>
+  <div class="loop">↺ Next meeting starts from step 4 and looks only for what is new</div>
+</div>
+
+<div class="rule"><b>Rule:</b> the rep's word is final. It overrides all research.</div>
+</body>
+</html>
